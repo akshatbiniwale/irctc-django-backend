@@ -121,3 +121,20 @@ def delete_train(request, trainId):
         return JsonResponse({'error': 'Invalid JSON data'}, status=400)
     except Exception as e:
         return JsonResponse({'error': f'Server error: {str(e)}'}, status=500)
+
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_train(request):
+    try:
+        trains = Train.objects.all()
+        serializer = TrainSerializer(trains, many=True)
+
+        return JsonResponse({
+            'message': 'Trains fetched successfully',
+            'trains': serializer.data
+        }, status=200)
+        
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': f'Server error: {str(e)}'}, status=500)
