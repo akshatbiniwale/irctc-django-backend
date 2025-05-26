@@ -53,3 +53,48 @@ def add_train(request):
         return JsonResponse({'error': 'Invalid JSON data'}, status=400)
     except Exception as e:
         return JsonResponse({'error': f'Server error: {str(e)}'}, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["PUT"])
+@jwt_required
+@admin_required
+def update_train(request, trainId):
+    try:
+        # Parse JSON data
+        data = json.loads(request.body)
+        name = data.get('name')
+        source = data.get('source')
+        destination = data.get('destination')
+        totalSeats = data.get('totalSeats')
+        admin = request.user
+
+        if not all([name, source, destination, totalSeats]):
+            return JsonResponse({'error': 'All fields are required'}, status=400)
+        
+        # Check if train exists
+        try:
+            train = Train.objects.get(id=trainId)
+        except Train.DoesNotExist:
+            return JsonResponse({'error': 'Train not found'}, status=404)
+        
+        # Update train fields
+        train.name = name
+        train.source = source
+        train.destination = destination
+        train.totalSeats = totalSeats
+        train.availableSeats = totalSeats  # Reset available seats
+        train.adminId = admin
+        train.save()
+
+        serializer = TrainSerializer(train)
+
+        return JsonResponse({
+            'message': 'Train updated successfully',
+            'train': serializer.data
+        }, status=200)
+        
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': f'Server error: {str(e)}'}, status=500)
