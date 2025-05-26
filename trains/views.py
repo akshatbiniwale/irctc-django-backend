@@ -98,3 +98,26 @@ def update_train(request, trainId):
         return JsonResponse({'error': 'Invalid JSON data'}, status=400)
     except Exception as e:
         return JsonResponse({'error': f'Server error: {str(e)}'}, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["DELETE"])
+@jwt_required
+@admin_required
+def delete_train(request, trainId):
+    try:
+        try:
+            train = Train.objects.get(id=trainId)
+        except Train.DoesNotExist:
+            return JsonResponse({'error': 'Train not found'}, status=404)
+        
+        train.delete()
+
+        return JsonResponse({
+            'message': 'Train deleted successfully',
+        }, status=200)
+        
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': f'Server error: {str(e)}'}, status=500)
