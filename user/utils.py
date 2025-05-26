@@ -20,19 +20,3 @@ def generate_jwt_token(user):
     )
     
     return token
-
-def verify_jwt_token(token):
-    """Verify and decode JWT token"""
-    try:
-        payload = jwt.decode(
-            token,
-            settings.JWT_SECRET_KEY,
-            algorithms=['HS256']
-        )
-        return payload, None
-    except jwt.ExpiredSignatureError:
-        return None, 'Token expired'
-    except jwt.InvalidTokenError:
-        return None, 'Invalid token'
-    except Exception as e:
-        return None, f'Token verification failed: {str(e)}'
